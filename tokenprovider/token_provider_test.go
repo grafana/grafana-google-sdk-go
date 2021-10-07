@@ -23,7 +23,7 @@ func (fts *fakeTokenSource) Token() (*oauth2.Token, error) {
 		fts.index += 1
 	}()
 
-	if fts.tokens[fts.index] == "" {
+	if fts.index >= len(fts.tokens) || fts.tokens[fts.index] == "" {
 		return nil, fmt.Errorf("failed")
 	}
 	return &oauth2.Token{
@@ -32,7 +32,7 @@ func (fts *fakeTokenSource) Token() (*oauth2.Token, error) {
 	}, nil
 }
 
-func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
+func TestJwtTokenProvider(t *testing.T) {
 	config := &Config{
 		RoutePath:         "pathwithjwttoken1",
 		RouteMethod:       "GET",
@@ -50,7 +50,6 @@ func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
 	}
 
 	setUp := func(t *testing.T, fn func(context.Context, *jwt.Config) oauth2.TokenSource) {
-		t.Helper()
 		origFn := getTokenSource
 		t.Cleanup(func() {
 			getTokenSource = origFn
@@ -60,7 +59,6 @@ func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
 	}
 
 	changeTime := func(t *testing.T, fn func() time.Time) {
-		t.Helper()
 		origFn := timeNow
 		t.Cleanup(func() {
 			timeNow = origFn
@@ -68,17 +66,6 @@ func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
 
 		timeNow = fn
 	}
-
-	t.Run("should fetch token using JWT private key", func(t *testing.T) {
-		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
-			return &fakeTokenSource{tokens: []string{"abc"}}
-		})
-		provider := NewJwtAccessTokenProvider(context.Background(), config)
-		token, err := provider.GetAccessToken()
-		require.NoError(t, err)
-
-		assert.Equal(t, "abc", token)
-	})
 
 	t.Run("should set JWT config values", func(t *testing.T) {
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
@@ -93,8 +80,9 @@ func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
 		})
 
 		provider := NewJwtAccessTokenProvider(context.Background(), config)
-		_, err := provider.GetAccessToken()
+		token, err := provider.GetAccessToken()
 		require.NoError(t, err)
+		assert.Equal(t, "abc", token)
 	})
 
 	t.Run("should use cached token on second call", func(t *testing.T) {
