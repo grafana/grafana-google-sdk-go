@@ -6,6 +6,7 @@ type Config struct {
 	RouteMethod       string
 	DataSourceID      int64
 	DataSourceVersion int
+	Scopes            []string
 
 	// JwtTokenConfig is only used for JWT tokens
 	JwtTokenConfig *JwtTokenConfig
