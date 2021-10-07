@@ -13,9 +13,9 @@ type gceAccessTokenProvider struct {
 }
 
 // NewGceAccessTokenProvider returns a token provider for gce authentication
-func NewGceAccessTokenProvider(dsID int64, dsVersion int) GoogleTokenProvider {
+func NewGceAccessTokenProvider(cfg *Config) TokenProvider {
 	gceRetriever := &gceAccessTokenProvider{
-		cacheKey: fmt.Sprintf("%v_%v_%v", dsID, dsVersion, "gce"),
+		cacheKey: fmt.Sprintf("gce_%v_%v_%v_%v", cfg.DataSourceID, cfg.DataSourceVersion, cfg.RoutePath, cfg.RouteMethod),
 	}
 	return &tokenProviderImpl{gceRetriever}
 }

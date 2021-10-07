@@ -11,29 +11,19 @@ import (
 // jwtAccessTokenProvider implements TokenRetriever for jwt file authentication
 type jwtAccessTokenProvider struct {
 	cacheKey   string
-	authParams *JwtTokenAuth
 	email      string
 	privateKey []byte
 	tokenURL   string
 }
 
 // NewJwtAccessTokenProvider returns a token provider for jwt file authentication
-func NewJwtAccessTokenProvider(dsID int64, dsVersion int, pluginRoute *AppPluginRoute,
-	authParams *JwtTokenAuth) GoogleTokenProvider {
+func NewJwtAccessTokenProvider(cfg *Config) TokenProvider {
+	key := fmt.Sprintf("jwt_%v_%v_%v_%v", cfg.DataSourceID, cfg.DataSourceVersion, cfg.RoutePath, cfg.RouteMethod)
 	jwtRetriever := &jwtAccessTokenProvider{
-		cacheKey:   fmt.Sprintf("%v_%v_%v_%v", dsID, dsVersion, pluginRoute.Path, pluginRoute.Method),
-		authParams: authParams,
-	}
-	if val, ok := authParams.Params["client_email"]; ok {
-		jwtRetriever.email = val
-	}
-
-	if val, ok := authParams.Params["private_key"]; ok {
-		jwtRetriever.privateKey = []byte(val)
-	}
-
-	if val, ok := authParams.Params["token_uri"]; ok {
-		jwtRetriever.tokenURL = val
+		cacheKey:   key,
+		email:      cfg.JwtTokenConfig.Email,
+		privateKey: cfg.JwtTokenConfig.PrivateKey,
+		tokenURL:   cfg.JwtTokenConfig.URI,
 	}
 	return &tokenProviderImpl{jwtRetriever}
 }

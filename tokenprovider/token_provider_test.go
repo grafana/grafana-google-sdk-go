@@ -13,35 +13,20 @@ import (
 )
 
 func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
-	pluginRoute := &AppPluginRoute{
-		Path:   "pathwithjwttoken1",
-		URL:    "https://api.jwt.io/some/path",
-		Method: "GET",
-		JwtTokenAuth: &JwtTokenAuth{
-			Url: "https://login.server.com/{{.JsonData.tenantId}}/oauth2/token",
-			Scopes: []string{
-				"https://www.testapi.com/auth/monitoring.read",
-				"https://www.testapi.com/auth/cloudplatformprojects.readonly",
-			},
-			Params: map[string]string{
-				"token_uri":    "{{.JsonData.tokenUri}}",
-				"client_email": "{{.JsonData.clientEmail}}",
-				"private_key":  "{{.SecureJsonData.privateKey}}",
-			},
+	config := &Config{
+		RoutePath:         "pathwithjwttoken1",
+		RouteMethod:       "GET",
+		DataSourceID:      1,
+		DataSourceVersion: 2,
+		JwtTokenConfig: &JwtTokenConfig{
+			Email:      "test@test.com",
+			PrivateKey: []byte("testkey"),
+			URI:        "login.url.com/token",
 		},
 	}
-
-	authParams := &JwtTokenAuth{
-		Url: "https://login.server.com/{{.JsonData.tenantId}}/oauth2/token",
-		Scopes: []string{
-			"https://www.testapi.com/auth/monitoring.read",
-			"https://www.testapi.com/auth/cloudplatformprojects.readonly",
-		},
-		Params: map[string]string{
-			"token_uri":    "login.url.com/token",
-			"client_email": "test@test.com",
-			"private_key":  "testkey",
-		},
+	scopes := []string{
+		"https://www.testapi.com/auth/monitoring.read",
+		"https://www.testapi.com/auth/cloudplatformprojects.readonly",
 	}
 
 	setUp := func(t *testing.T, fn func(context.Context, *jwt.Config) (*oauth2.Token, error)) {
@@ -53,15 +38,12 @@ func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
 		getToken = fn
 	}
 
-	dsId := int64(1)
-	dsVersion := 2
-
 	t.Run("should fetch token using JWT private key", func(t *testing.T) {
 		setUp(t, func(ctx context.Context, conf *jwt.Config) (*oauth2.Token, error) {
 			return &oauth2.Token{AccessToken: "abc"}, nil
 		})
-		provider := NewJwtAccessTokenProvider(dsId, dsVersion, pluginRoute, authParams)
-		token, err := provider.GetAccessToken(context.Background(), authParams.Scopes)
+		provider := NewJwtAccessTokenProvider(config)
+		token, err := provider.GetAccessToken(context.Background(), scopes)
 		require.NoError(t, err)
 
 		assert.Equal(t, "abc", token)
@@ -79,8 +61,8 @@ func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
 			return &oauth2.Token{AccessToken: "abc"}, nil
 		})
 
-		provider := NewJwtAccessTokenProvider(dsId, dsVersion, pluginRoute, authParams)
-		_, err := provider.GetAccessToken(context.Background(), authParams.Scopes)
+		provider := NewJwtAccessTokenProvider(config)
+		_, err := provider.GetAccessToken(context.Background(), scopes)
 		require.NoError(t, err)
 	})
 
@@ -90,15 +72,15 @@ func TestAccessToken_pluginWithJWTTokenAuthRoute(t *testing.T) {
 				AccessToken: "abc",
 				Expiry:      time.Now().Add(1 * time.Minute)}, nil
 		})
-		provider := NewJwtAccessTokenProvider(dsId, dsVersion, pluginRoute, authParams)
-		token1, err := provider.GetAccessToken(context.Background(), authParams.Scopes)
+		provider := NewJwtAccessTokenProvider(config)
+		token1, err := provider.GetAccessToken(context.Background(), scopes)
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token1)
 
 		getToken = func(ctx context.Context, conf *jwt.Config) (*oauth2.Token, error) {
 			return &oauth2.Token{AccessToken: "error: cache not used"}, nil
 		}
-		token2, err := provider.GetAccessToken(context.Background(), authParams.Scopes)
+		token2, err := provider.GetAccessToken(context.Background(), scopes)
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token2)
 	})
