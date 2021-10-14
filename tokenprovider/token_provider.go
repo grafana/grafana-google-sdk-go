@@ -36,25 +36,25 @@ type tokenProviderImpl struct {
 }
 
 // GetAccessToken implements TokenProvider
-func (tpi *tokenProviderImpl) GetAccessToken() (string, error) {
+func (provider *tokenProviderImpl) GetAccessToken() (string, error) {
 	tokenCache.Lock()
 	defer tokenCache.Unlock()
-	if cachedToken, found := tokenCache.cache[tpi.cacheKey]; found {
+	if cachedToken, found := tokenCache.cache[provider.cacheKey]; found {
 		if cachedToken.Expiry.After(timeNow().Add(time.Second * 10)) {
 			return cachedToken.AccessToken, nil
 		}
 	}
-	token, err := tpi.tokenSource.Token()
+	token, err := provider.tokenSource.Token()
 	if err != nil {
 		return "", err
 	}
 
-	tokenCache.cache[tpi.cacheKey] = token
+	tokenCache.cache[provider.cacheKey] = token
 	return token.AccessToken, nil
 }
 
 func createCacheKey(authtype string, cfg *Config) string {
-	key := fmt.Sprintf("%v_%v_%v_%v_%v", authtype, cfg.DataSourceID, cfg.DataSourceVersion, cfg.RoutePath, cfg.RouteMethod)
+	key := fmt.Sprintf("%v_%v_%v_%v_%v", authtype, cfg.DataSourceID, cfg.DataSourceUpdated.Unix(), cfg.RoutePath, cfg.RouteMethod)
 	if len(cfg.Scopes) == 0 {
 		return key
 	}

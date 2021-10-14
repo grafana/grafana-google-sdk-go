@@ -32,12 +32,29 @@ func (fts *fakeTokenSource) Token() (*oauth2.Token, error) {
 	}, nil
 }
 
+func TestCreateCacheKey(t *testing.T) {
+	config := &Config{
+		RoutePath:         "path",
+		RouteMethod:       "GET",
+		DataSourceID:      1,
+		DataSourceUpdated: time.Now(),
+		Scopes: []string{
+			"scope1",
+			"scope2",
+		},
+	}
+
+	expectedKey := fmt.Sprintf("gce_1_%v_path_GET_scope1-scope2", config.DataSourceUpdated.Unix())
+	actualKey := createCacheKey("gce", config)
+	assert.Equal(t, expectedKey, actualKey)
+}
+
 func TestJwtTokenProvider(t *testing.T) {
 	config := &Config{
 		RoutePath:         "pathwithjwttoken1",
 		RouteMethod:       "GET",
 		DataSourceID:      1,
-		DataSourceVersion: 2,
+		DataSourceUpdated: time.Now(),
 		Scopes: []string{
 			"https://www.testapi.com/auth/monitoring.read",
 			"https://www.testapi.com/auth/cloudplatformprojects.readonly",

@@ -1,11 +1,13 @@
 package tokenprovider
 
+import "time"
+
 // Config is the configuration for getting a TokenProvider.
 type Config struct {
 	RoutePath         string
 	RouteMethod       string
 	DataSourceID      int64
-	DataSourceVersion int
+	DataSourceUpdated time.Time
 	Scopes            []string
 
 	// JwtTokenConfig is only used for JWT tokens
