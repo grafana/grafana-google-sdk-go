@@ -1,6 +1,7 @@
 package tokenprovider
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -26,30 +27,34 @@ type oauthTokenCacheType struct {
 
 // TokenProvider is anything that can return a token
 type TokenProvider interface {
-	GetAccessToken() (string, error)
+	GetAccessToken(context.Context) (string, error)
+}
+
+type tokenSource interface {
+	getCacheKey() string
+	getToken(context.Context) (*oauth2.Token, error)
 }
 
 // tokenProviderImpl implements the TokenProvider interface
 type tokenProviderImpl struct {
-	cacheKey    string
-	tokenSource oauth2.TokenSource
+	tokenSource
 }
 
 // GetAccessToken implements TokenProvider
-func (provider *tokenProviderImpl) GetAccessToken() (string, error) {
+func (provider *tokenProviderImpl) GetAccessToken(ctx context.Context) (string, error) {
 	tokenCache.Lock()
 	defer tokenCache.Unlock()
-	if cachedToken, found := tokenCache.cache[provider.cacheKey]; found {
+	if cachedToken, found := tokenCache.cache[provider.getCacheKey()]; found {
 		if cachedToken.Expiry.After(timeNow().Add(time.Second * 10)) {
 			return cachedToken.AccessToken, nil
 		}
 	}
-	token, err := provider.tokenSource.Token()
+	token, err := provider.getToken(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	tokenCache.cache[provider.cacheKey] = token
+	tokenCache.cache[provider.getCacheKey()] = token
 	return token.AccessToken, nil
 }
 
