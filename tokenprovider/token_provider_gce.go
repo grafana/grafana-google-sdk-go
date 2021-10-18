@@ -3,18 +3,33 @@ package tokenprovider
 import (
 	"context"
 
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
+type gceSource struct {
+	cacheKey string
+	scopes   []string
+}
+
 // NewGceAccessTokenProvider returns a token provider for gce authentication
-func NewGceAccessTokenProvider(ctx context.Context, cfg *Config) (TokenProvider, error) {
-	source, err := google.DefaultTokenSource(ctx, cfg.Scopes...)
+func NewGceAccessTokenProvider(cfg Config) TokenProvider {
+	return &tokenProviderImpl{
+		&gceSource{
+			cacheKey: createCacheKey("gce", &cfg),
+			scopes:   cfg.Scopes,
+		},
+	}
+}
+
+func (source *gceSource) getCacheKey() string {
+	return source.cacheKey
+}
+
+func (source *gceSource) getToken(ctx context.Context) (*oauth2.Token, error) {
+	tokenSource, err := google.DefaultTokenSource(ctx, source.scopes...)
 	if err != nil {
 		return nil, err
 	}
-
-	return &tokenProviderImpl{
-		cacheKey:    createCacheKey("gce", cfg),
-		tokenSource: source,
-	}, nil
+	return tokenSource.Token()
 }
