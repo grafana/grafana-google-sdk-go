@@ -50,7 +50,7 @@ func TestCreateCacheKey(t *testing.T) {
 }
 
 func TestJwtTokenProvider(t *testing.T) {
-	config := &Config{
+	config := Config{
 		RoutePath:         "pathwithjwttoken1",
 		RouteMethod:       "GET",
 		DataSourceID:      1,
@@ -96,41 +96,43 @@ func TestJwtTokenProvider(t *testing.T) {
 			return &fakeTokenSource{tokens: []string{"abc"}}
 		})
 
-		provider := NewJwtAccessTokenProvider(context.Background(), config)
-		token, err := provider.GetAccessToken()
+		provider := NewJwtAccessTokenProvider(config)
+		token, err := provider.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token)
 	})
 
 	t.Run("should use cached token on second call", func(t *testing.T) {
 		clearTokenCache()
+		fakeSource := fakeTokenSource{tokens: []string{"abc", ""}}
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
-			return &fakeTokenSource{tokens: []string{"abc", ""}}
+			return &fakeSource
 		})
-		provider := NewJwtAccessTokenProvider(context.Background(), config)
-		token1, err := provider.GetAccessToken()
+		provider := NewJwtAccessTokenProvider(config)
+		token1, err := provider.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token1)
 
-		token2, err := provider.GetAccessToken()
+		token2, err := provider.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token2)
 	})
 
 	t.Run("should not use expired cached token", func(t *testing.T) {
 		clearTokenCache()
+		fakeSource := fakeTokenSource{tokens: []string{"abc", "def"}}
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
-			return &fakeTokenSource{tokens: []string{"abc", "def"}}
+			return &fakeSource
 		})
-		provider := NewJwtAccessTokenProvider(context.Background(), config)
-		token1, err := provider.GetAccessToken()
+		provider := NewJwtAccessTokenProvider(config)
+		token1, err := provider.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token1)
 
 		changeTime(t, func() time.Time {
 			return time.Now().Add(time.Hour)
 		})
-		token2, err := provider.GetAccessToken()
+		token2, err := provider.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "def", token2)
 	})
@@ -140,28 +142,29 @@ func TestJwtTokenProvider(t *testing.T) {
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
 			return &fakeTokenSource{tokens: []string{"abc"}}
 		})
-		provider1 := NewJwtAccessTokenProvider(context.Background(), config)
-		token1, err := provider1.GetAccessToken()
+		provider1 := NewJwtAccessTokenProvider(config)
+		token1, err := provider1.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token1)
 
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
 			return &fakeTokenSource{tokens: []string{"xyz"}}
 		})
-		provider2 := NewJwtAccessTokenProvider(context.Background(), config)
-		token2, err := provider2.GetAccessToken()
+		provider2 := NewJwtAccessTokenProvider(config)
+		token2, err := provider2.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token2)
 	})
 
 	t.Run("should not use cache for different scope", func(t *testing.T) {
 		clearTokenCache()
+		fakeSource := fakeTokenSource{tokens: []string{"abc", "def"}}
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
-			return &fakeTokenSource{tokens: []string{"abc", "def"}}
+			return &fakeSource
 		})
 		config.Scopes = []string{"scope1"}
-		provider := NewJwtAccessTokenProvider(context.Background(), config)
-		token1, err := provider.GetAccessToken()
+		provider := NewJwtAccessTokenProvider(config)
+		token1, err := provider.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "abc", token1)
 
@@ -169,8 +172,8 @@ func TestJwtTokenProvider(t *testing.T) {
 			return &fakeTokenSource{tokens: []string{"xyz"}}
 		})
 		config.Scopes = []string{"scope2"}
-		provider = NewJwtAccessTokenProvider(context.Background(), config)
-		token2, err := provider.GetAccessToken()
+		provider = NewJwtAccessTokenProvider(config)
+		token2, err := provider.GetAccessToken(context.Background())
 		require.NoError(t, err)
 		assert.Equal(t, "xyz", token2)
 	})
