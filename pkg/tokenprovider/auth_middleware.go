@@ -7,7 +7,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
 )
 
-const authenticationMiddlewareName = "AzureAuthentication"
+const authenticationMiddlewareName = "GoogleAuthentication"
 
 func AuthMiddleware(tokenProvider TokenProvider) httpclient.Middleware {
 	return httpclient.NamedMiddlewareFunc(authenticationMiddlewareName, func(opts httpclient.Options, next http.RoundTripper) http.RoundTripper {
