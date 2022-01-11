@@ -8,8 +8,8 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-func GCEDefaultProject(ctx context.Context) (string, error) {
-	defaultCredentials, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/monitoring.read")
+func GCEDefaultProject(ctx context.Context, scope string) (string, error) {
+	defaultCredentials, err := google.FindDefaultCredentials(ctx, scope)
 	if err != nil {
 		return "", fmt.Errorf("failed to retrieve default project from GCE metadata server: %w", err)
 	}
