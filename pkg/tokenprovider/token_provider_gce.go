@@ -30,6 +30,7 @@ func NewGceAccessTokenProvider(cfg Config) TokenProvider {
 	}
 }
 
+// NewImpersonatedGceAccessTokenProvider returns a token provider for an ipmersonated service account when using gce authentication
 func NewImpersonatedGceAccessTokenProvider(cfg Config) TokenProvider {
 	return &tokenProviderImpl{
 		&impersonatedGceSource{
