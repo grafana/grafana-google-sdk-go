@@ -1,6 +1,6 @@
 # Developer guide
 
-This guide helps you get started developing Grafana Plugin SDK for Go.
+This guide helps you get started developing Grafana Google SDK for Go.
 
 ## Tooling
 
@@ -40,20 +40,6 @@ mage test
 mage lint
 ```
 
-### Generate Go code for Protobuf definitions
-
-A prerequisite is to have [protoc](http://google.github.io/proto-lens/installing-protoc.html) installed and available in your path.
-
-Next, you need to have [protoc-gen-go](https://github.com/golang/protobuf/tree/v1.3.4#installation) installed and available in your path. It's very important that you match the version specified of `github.com/golang/protobuf` in [go.mod](go.mod) file, as of this writing it's v1.3.4.
-
-```
-mage protobuf
-```
-
-### Changing `generic_*.go` files in the `data` package
-
-Currently [genny](https://github.com/cheekybits/genny) is used for generating some go code. If you make changes to generic template files then `genny` needs to be installed, and then `mage dataGenerate`. Changed generated files should be committed with the change in the template files.
-
 ### Dependency management
 
 We use Go modules for managing Go dependencies. After you've updated/modified modules dependencies, please run `go mod tidy` to cleanup dependencies.
@@ -63,20 +49,14 @@ We use Go modules for managing Go dependencies. After you've updated/modified mo
 If you want to tag a new version of the SDK for release, follow these steps:
 
 - Checkout the commit you want to tag (`git checkout <COMMIT_SHA>`)
-- Run `git tag <VERSION>` (For example **v0.123.0**)
+- Run `git tag <VERSION>` (For example **v0.3.1**)
   - NOTE: We're using Lightweight Tags, so no other options are required
 - Run `git push origin <VERSION>`
-- Verify that the tag was create successfully [here](https://github.com/grafana/grafana-plugin-sdk-go/releases)
-- Run [`gorelease`](https://pkg.go.dev/golang.org/x/exp/cmd/gorelease) to compare the new tag with the previous release. For example, when releasing v0.114.0:
+- Verify that the tag was create successfully [here](https://github.com/grafana/grafana-google-sdk-go/releases)
+- Run [`gorelease`](https://pkg.go.dev/golang.org/x/exp/cmd/gorelease) to compare the new tag with the previous release. For example, when releasing v0.3.1:
 
 ```
-gorelease -base v0.113.0 -version v0.114.0
-github.com/grafana/grafana-plugin-sdk-go/backend/gtime
-------------------------------------------------------
-Compatible changes:
-- package added
-
-v0.114.0 is a valid semantic version for this release.
+gorelease -base v0.3.0 -version v0.3.1
 ```
 
 - Edit the tag on GitHub and create a release from it. Use the tag name as title and the output of the command above as the body.
