@@ -42,11 +42,6 @@ jobs:
         run: |
           mage -v build
 
-      - name: Install test dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y gcc
-
       - name: Test
         run: |
-          CGO_ENABLED=1 mage -v testRace
+          mage -v test
