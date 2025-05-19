@@ -2,7 +2,6 @@ package tokenprovider
 
 import (
 	"context"
-	"log"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -18,6 +17,8 @@ type impersonatedGceSource struct {
 	cacheKey        string
 	scopes          []string
 	TargetPrincipal string
+	Delegates       []string
+	Subject         string
 }
 
 // NewGceAccessTokenProvider returns a token provider for gce authentication
@@ -30,13 +31,15 @@ func NewGceAccessTokenProvider(cfg Config) TokenProvider {
 	}
 }
 
-// NewImpersonatedGceAccessTokenProvider returns a token provider for an ipmersonated service account when using gce authentication
+// NewImpersonatedGceAccessTokenProvider returns a token provider for an impersonated service account when using gce authentication
 func NewImpersonatedGceAccessTokenProvider(cfg Config) TokenProvider {
 	return &tokenProviderImpl{
 		&impersonatedGceSource{
 			cacheKey:        createCacheKey("gce", &cfg),
 			scopes:          cfg.Scopes,
 			TargetPrincipal: cfg.TargetPrincipal,
+			Subject:         cfg.Subject,
+			Delegates:       cfg.Delegates,
 		},
 	}
 }
@@ -60,10 +63,12 @@ func (source *impersonatedGceSource) getCacheKey() string {
 func (source *impersonatedGceSource) getToken(ctx context.Context) (*oauth2.Token, error) {
 	tokenSource, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
 		TargetPrincipal: source.TargetPrincipal,
-		Scopes:          []string{"https://www.googleapis.com/auth/cloud-platform.read-only"},
+		Scopes:          source.scopes,
+		Delegates:       source.Delegates,
+		Subject:         source.Subject,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return tokenSource.Token()
 }

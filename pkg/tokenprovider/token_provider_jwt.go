@@ -2,7 +2,6 @@ package tokenprovider
 
 import (
 	"context"
-	"log"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/jwt"
@@ -19,6 +18,8 @@ type impersonatedJwtSource struct {
 	cacheKey        string
 	conf            jwt.Config
 	TargetPrincipal string
+	Subject         string
+	Delegates       []string
 }
 
 // NewJwtAccessTokenProvider returns a token provider for jwt file authentication
@@ -36,7 +37,7 @@ func NewJwtAccessTokenProvider(cfg Config) TokenProvider {
 	}
 }
 
-// NewJwtAccessTokenProvider returns a token provider for an ipmersonated service account when using jwt file authentication
+// NewJwtAccessTokenProvider returns a token provider for an impersonated service account when using jwt file authentication
 func NewImpersonatedJwtAccessTokenProvider(cfg Config) TokenProvider {
 	return &tokenProviderImpl{
 		&impersonatedJwtSource{
@@ -48,6 +49,8 @@ func NewImpersonatedJwtAccessTokenProvider(cfg Config) TokenProvider {
 				Scopes:     cfg.Scopes,
 			},
 			TargetPrincipal: cfg.TargetPrincipal,
+			Subject:         cfg.Subject,
+			Delegates:       cfg.Delegates,
 		},
 	}
 }
@@ -68,10 +71,12 @@ func (source *impersonatedJwtSource) getToken(ctx context.Context) (*oauth2.Toke
 	baseTokenSource := getTokenSource(ctx, &source.conf)
 	tokenSource, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
 		TargetPrincipal: source.TargetPrincipal,
-		Scopes:          []string{"https://www.googleapis.com/auth/cloud-platform.read-only"},
+		Scopes:          source.conf.Scopes,
+		Subject:         source.Subject,
+		Delegates:       source.Delegates,
 	}, option.WithTokenSource(baseTokenSource))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return tokenSource.Token()
 }

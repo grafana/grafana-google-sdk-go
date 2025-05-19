@@ -12,6 +12,10 @@ type Config struct {
 
 	// TargetPrincipal is only used when using service account impersonation
 	TargetPrincipal string
+	// Subject is only used when using service account impersonation
+	Subject string
+	// Delegates is only used when using service account impersonation
+	Delegates []string
 	// JwtTokenConfig is only used for JWT tokens
 	JwtTokenConfig *JwtTokenConfig
 }
