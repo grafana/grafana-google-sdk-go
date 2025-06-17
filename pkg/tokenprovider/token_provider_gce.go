@@ -36,7 +36,7 @@ func NewImpersonatedGceAccessTokenProvider(cfg Config) TokenProvider {
 	return &tokenProviderImpl{
 		&impersonatedGceSource{
 			cacheKey:        createCacheKey("gce", &cfg),
-			scopes:          cfg.Scopes,
+			scopes:          append(cfg.Scopes, "https://www.googleapis.com/auth/cloud-platform"),
 			TargetPrincipal: cfg.TargetPrincipal,
 			Subject:         cfg.Subject,
 			Delegates:       cfg.Delegates,
