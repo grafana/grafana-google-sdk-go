@@ -46,7 +46,7 @@ func NewImpersonatedJwtAccessTokenProvider(cfg Config) TokenProvider {
 				Email:      cfg.JwtTokenConfig.Email,
 				PrivateKey: cfg.JwtTokenConfig.PrivateKey,
 				TokenURL:   cfg.JwtTokenConfig.URI,
-				Scopes:     cfg.Scopes,
+				Scopes:     append(cfg.Scopes, "https://www.googleapis.com/auth/cloud-platform"),
 			},
 			TargetPrincipal: cfg.TargetPrincipal,
 			Subject:         cfg.Subject,

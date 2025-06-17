@@ -3,6 +3,7 @@ package tokenprovider
 import (
 	"context"
 	"fmt"
+	"slices"
 	"testing"
 	"time"
 
@@ -177,6 +178,30 @@ func TestJwtTokenProvider(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "xyz", token2)
 	})
+
+}
+func TestNewImpersonatedJwtAccessTokenProvider_AddsCloudPlatformScope(t *testing.T) {
+	cfg := Config{
+		JwtTokenConfig: &JwtTokenConfig{
+			Email:      "test@example.com",
+			PrivateKey: []byte("dummy"),
+			URI:        "https://oauth2.googleapis.com/token",
+		},
+		Scopes:          []string{"scope1", "scope2"},
+		TargetPrincipal: "impersonated@example.com",
+		Subject:         "subject@example.com",
+		Delegates:       []string{"delegate1"},
+	}
+
+	provider := NewImpersonatedJwtAccessTokenProvider(cfg)
+	impl, ok := provider.(*tokenProviderImpl)
+	require.True(t, ok, "provider should be of type *tokenProviderImpl")
+
+	src, ok := impl.tokenSource.(*impersonatedJwtSource)
+	require.True(t, ok, "source should be of type *impersonatedJwtSource")
+
+	found := slices.Contains(src.conf.Scopes, "https://www.googleapis.com/auth/cloud-platform")
+	require.True(t, found, "cloud-platform scope should be present in scopes")
 }
 
 func clearTokenCache() {
