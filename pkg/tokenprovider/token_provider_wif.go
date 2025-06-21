@@ -90,6 +90,11 @@ func NewWifAccessTokenProvider(cfg Config, wifConfig *WifConfig) (TokenProvider,
     }, nil
 }
 
+// getCacheKey returns the cache key for the token source.
+func (source *wifSource) getCacheKey() string {
+    return source.cacheKey
+}
+
 // getToken implements the tokenSource interface.
 // It performs the token exchange using the configured JWT bearer token.
 func (source *wifSource) getToken(ctx context.Context) (*oauth2.Token, error) {
@@ -137,9 +142,29 @@ func (source *wifSource) getToken(ctx context.Context) (*oauth2.Token, error) {
     }
     defer resp.Body.Close()
 
+    // Read the response body first, as we'll need it for both error and success cases
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, fmt.Errorf("failed to read token response: %v", err)
+    }
+
+    // Handle non-200 status codes
     if resp.StatusCode != http.StatusOK {
-        body, _ := io.ReadAll(resp.Body)
+        // Try to parse error response if it's JSON
+        var errorResp struct {
+            Error       string `json:"error"`
+            Description string `json:"error_description"`
+        }
+        if json.Unmarshal(body, &errorResp) == nil && errorResp.Error != "" {
+            return nil, fmt.Errorf("token exchange failed with status %d: %s - %s", 
+                resp.StatusCode, errorResp.Error, errorResp.Description)
+        }
         return nil, fmt.Errorf("token exchange failed with status %d: %s", resp.StatusCode, string(body))
+    }
+
+    // For 200 OK, first verify if the response is valid JSON
+    if !json.Valid(body) {
+        return nil, fmt.Errorf("failed to decode token response: invalid JSON")
     }
 
     var tokenResp struct {
@@ -150,8 +175,8 @@ func (source *wifSource) getToken(ctx context.Context) (*oauth2.Token, error) {
         ErrorDesc   string `json:"error_description"`
     }
 
-    if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-        return nil, fmt.Errorf("failed to decode token response: %v", err)
+    if err := json.Unmarshal(body, &tokenResp); err != nil {
+        return nil, fmt.Errorf("failed to decode token response: %v, body: %s", err, string(body))
     }
 
     if tokenResp.Error != "" {
@@ -223,6 +248,11 @@ func NewImpersonatedWifAccessTokenProvider(cfg Config, wifConfig *WifConfig) (To
             Delegates:       cfg.Delegates,
         },
     }, nil
+}
+
+// getCacheKey returns the cache key for the token source.
+func (source *impersonatedWifSource) getCacheKey() string {
+    return source.cacheKey
 }
 
 // getToken implements the tokenSource interface for impersonated WIF.

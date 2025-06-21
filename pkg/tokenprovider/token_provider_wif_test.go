@@ -36,7 +36,7 @@ func TestNewWifAccessTokenProvider(t *testing.T) {
 
 	t.Run("should return error when JWT token is missing", func(t *testing.T) {
 		_, err := NewWifAccessTokenProvider(Config{}, &WifConfig{
-			Audience:        "test",
+			Audience:         "test",
 			SubjectTokenType: "test",
 		})
 		assert.Error(t, err)
@@ -67,8 +67,8 @@ func TestWifTokenExchange(t *testing.T) {
 
 	// Test with custom token URL
 	provider, err := NewWifAccessTokenProvider(Config{}, &WifConfig{
-		Audience:        "test-audience",
-		TokenURL:        testServer.URL,
+		Audience:         "test-audience",
+		TokenURL:         testServer.URL,
 		SubjectTokenType: "test-token-type",
 		JwtBearerToken:   "test-jwt-token",
 	})
@@ -115,8 +115,8 @@ func TestWifTokenExchange_ErrorCases(t *testing.T) {
 			defer testServer.Close()
 
 			provider, err := NewWifAccessTokenProvider(Config{}, &WifConfig{
-				Audience:        "test",
-				TokenURL:        testServer.URL,
+				Audience:         "test",
+				TokenURL:         testServer.URL,
 				SubjectTokenType: "test",
 				JwtBearerToken:   "test",
 			})
@@ -142,7 +142,7 @@ func TestImpersonatedWifAccessTokenProvider(t *testing.T) {
 	defer tokenServer.Close()
 
 	// Setup test server for impersonation
-	impersonationServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Verify authorization header contains the WIF token
 		auth := r.Header.Get("Authorization")
 		assert.Equal(t, "Bearer test-wif-token", auth)
@@ -157,8 +157,8 @@ func TestImpersonatedWifAccessTokenProvider(t *testing.T) {
 	provider, err := NewImpersonatedWifAccessTokenProvider(Config{
 		TargetPrincipal: "test-service-account@project.iam.gserviceaccount.com",
 	}, &WifConfig{
-		Audience:        "test-audience",
-		TokenURL:        tokenServer.URL,
+		Audience:         "test-audience",
+		TokenURL:         tokenServer.URL,
 		SubjectTokenType: "test-token-type",
 		JwtBearerToken:   "test-jwt-token",
 	})
@@ -186,7 +186,7 @@ func TestNewImpersonatedWifAccessTokenProvider_ValidatesConfig(t *testing.T) {
 			name: "missing target principal",
 			cfg:  Config{},
 			wifCfg: &WifConfig{
-				Audience:        "test",
+				Audience:         "test",
 				SubjectTokenType: "test",
 				JwtBearerToken:   "test",
 			},
@@ -196,9 +196,9 @@ func TestNewImpersonatedWifAccessTokenProvider_ValidatesConfig(t *testing.T) {
 			name: "uses service account email",
 			cfg:  Config{},
 			wifCfg: &WifConfig{
-				Audience:          "test",
-				SubjectTokenType:   "test",
-				JwtBearerToken:     "test",
+				Audience:            "test",
+				SubjectTokenType:    "test",
+				JwtBearerToken:      "test",
 				ServiceAccountEmail: "test@example.com",
 			},
 			wantErr: "",
