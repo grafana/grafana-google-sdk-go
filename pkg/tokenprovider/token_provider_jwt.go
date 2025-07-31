@@ -25,7 +25,7 @@ type impersonatedJwtSource struct {
 // NewJwtAccessTokenProvider returns a token provider for jwt file authentication
 func NewJwtAccessTokenProvider(cfg Config) TokenProvider {
 	return &tokenProviderImpl{
-		&jwtSource{
+		tokenSource: &jwtSource{
 			cacheKey: createCacheKey("jwt", &cfg),
 			conf: jwt.Config{
 				Email:      cfg.JwtTokenConfig.Email,
@@ -34,13 +34,14 @@ func NewJwtAccessTokenProvider(cfg Config) TokenProvider {
 				Scopes:     cfg.Scopes,
 			},
 		},
+		cache: map[string]oauth2.Token{},
 	}
 }
 
 // NewJwtAccessTokenProvider returns a token provider for an impersonated service account when using jwt file authentication
 func NewImpersonatedJwtAccessTokenProvider(cfg Config) TokenProvider {
 	return &tokenProviderImpl{
-		&impersonatedJwtSource{
+		tokenSource: &impersonatedJwtSource{
 			cacheKey: createCacheKey("jwt", &cfg),
 			conf: jwt.Config{
 				Email:      cfg.JwtTokenConfig.Email,
@@ -52,6 +53,7 @@ func NewImpersonatedJwtAccessTokenProvider(cfg Config) TokenProvider {
 			Subject:         cfg.Subject,
 			Delegates:       cfg.Delegates,
 		},
+		cache: map[string]oauth2.Token{},
 	}
 }
 

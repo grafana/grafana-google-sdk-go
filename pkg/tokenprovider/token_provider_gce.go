@@ -24,23 +24,25 @@ type impersonatedGceSource struct {
 // NewGceAccessTokenProvider returns a token provider for gce authentication
 func NewGceAccessTokenProvider(cfg Config) TokenProvider {
 	return &tokenProviderImpl{
-		&gceSource{
+		tokenSource: &gceSource{
 			cacheKey: createCacheKey("gce", &cfg),
 			scopes:   cfg.Scopes,
 		},
+		cache: map[string]oauth2.Token{},
 	}
 }
 
 // NewImpersonatedGceAccessTokenProvider returns a token provider for an impersonated service account when using gce authentication
 func NewImpersonatedGceAccessTokenProvider(cfg Config) TokenProvider {
 	return &tokenProviderImpl{
-		&impersonatedGceSource{
+		tokenSource: &impersonatedGceSource{
 			cacheKey:        createCacheKey("gce", &cfg),
 			scopes:          append(cfg.Scopes, "https://www.googleapis.com/auth/cloud-platform"),
 			TargetPrincipal: cfg.TargetPrincipal,
 			Subject:         cfg.Subject,
 			Delegates:       cfg.Delegates,
 		},
+		cache: map[string]oauth2.Token{},
 	}
 }
 
