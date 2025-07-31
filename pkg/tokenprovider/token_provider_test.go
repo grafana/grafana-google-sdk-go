@@ -104,7 +104,6 @@ func TestJwtTokenProvider(t *testing.T) {
 	})
 
 	t.Run("should use cached token on second call", func(t *testing.T) {
-		clearTokenCache()
 		fakeSource := fakeTokenSource{tokens: []string{"abc", ""}}
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
 			return &fakeSource
@@ -120,7 +119,6 @@ func TestJwtTokenProvider(t *testing.T) {
 	})
 
 	t.Run("should not use expired cached token", func(t *testing.T) {
-		clearTokenCache()
 		fakeSource := fakeTokenSource{tokens: []string{"abc", "def"}}
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
 			return &fakeSource
@@ -138,27 +136,7 @@ func TestJwtTokenProvider(t *testing.T) {
 		assert.Equal(t, "def", token2)
 	})
 
-	t.Run("should use cached token for same config", func(t *testing.T) {
-		clearTokenCache()
-		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
-			return &fakeTokenSource{tokens: []string{"abc"}}
-		})
-		provider1 := NewJwtAccessTokenProvider(config)
-		token1, err := provider1.GetAccessToken(context.Background())
-		require.NoError(t, err)
-		assert.Equal(t, "abc", token1)
-
-		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
-			return &fakeTokenSource{tokens: []string{"xyz"}}
-		})
-		provider2 := NewJwtAccessTokenProvider(config)
-		token2, err := provider2.GetAccessToken(context.Background())
-		require.NoError(t, err)
-		assert.Equal(t, "abc", token2)
-	})
-
 	t.Run("should not use cache for different scope", func(t *testing.T) {
-		clearTokenCache()
 		fakeSource := fakeTokenSource{tokens: []string{"abc", "def"}}
 		setUp(t, func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
 			return &fakeSource
@@ -202,10 +180,4 @@ func TestNewImpersonatedJwtAccessTokenProvider_AddsCloudPlatformScope(t *testing
 
 	found := slices.Contains(src.conf.Scopes, "https://www.googleapis.com/auth/cloud-platform")
 	require.True(t, found, "cloud-platform scope should be present in scopes")
-}
-
-func clearTokenCache() {
-	tokenCache.Lock()
-	defer tokenCache.Unlock()
-	tokenCache.cache = map[string]*oauth2.Token{}
 }

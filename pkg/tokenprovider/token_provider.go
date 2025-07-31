@@ -12,18 +12,9 @@ import (
 )
 
 var (
-	tokenCache = oauthTokenCacheType{
-		cache: map[string]*oauth2.Token{},
-	}
-
 	// timeNow makes it possible to test usage of time
 	timeNow = time.Now
 )
-
-type oauthTokenCacheType struct {
-	cache map[string]*oauth2.Token
-	sync.Mutex
-}
 
 // TokenProvider is anything that can return a token
 type TokenProvider interface {
@@ -37,24 +28,33 @@ type tokenSource interface {
 
 // tokenProviderImpl implements the TokenProvider interface
 type tokenProviderImpl struct {
-	tokenSource
+	tokenSource tokenSource
+	cache       map[string]oauth2.Token
+	cacheLock   sync.RWMutex
 }
 
 // GetAccessToken implements TokenProvider
 func (provider *tokenProviderImpl) GetAccessToken(ctx context.Context) (string, error) {
-	tokenCache.Lock()
-	defer tokenCache.Unlock()
-	if cachedToken, found := tokenCache.cache[provider.getCacheKey()]; found {
+	providerCacheKey := provider.tokenSource.getCacheKey()
+
+	provider.cacheLock.RLock()
+	cachedToken, found := provider.cache[providerCacheKey]
+	provider.cacheLock.RUnlock()
+	if found {
 		if cachedToken.Expiry.After(timeNow().Add(time.Second * 10)) {
 			return cachedToken.AccessToken, nil
 		}
 	}
-	token, err := provider.getToken(ctx)
+
+	provider.cacheLock.Lock()
+	defer provider.cacheLock.Unlock()
+
+	token, err := provider.tokenSource.getToken(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	tokenCache.cache[provider.getCacheKey()] = token
+	provider.cache[providerCacheKey] = *token
 	return token.AccessToken, nil
 }
 
