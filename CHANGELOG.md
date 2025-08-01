@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.2
+
+- Narrow token cache scope to the provider level (#17)
+
 ## v0.4.1
 
 - Add `"https://www.googleapis.com/auth/cloud-platform"` scope to impersonated providers
