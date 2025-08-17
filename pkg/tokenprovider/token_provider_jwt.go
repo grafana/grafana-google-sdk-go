@@ -3,6 +3,10 @@ package tokenprovider
 import (
 	"context"
 
+	"encoding/json"
+
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/oauth2adapt"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/impersonate"
@@ -86,5 +90,33 @@ func (source *impersonatedJwtSource) getToken(ctx context.Context) (*oauth2.Toke
 // getTokenSource returns a TokenSource.
 // Stubbable by tests.
 var getTokenSource = func(ctx context.Context, conf *jwt.Config) oauth2.TokenSource {
-	return conf.TokenSource(ctx)
+	// Reconstruct the essential parts of the service account JSON from the jwt.Config
+	// so we can use the google-specific credential constructor.
+	sa := map[string]string{
+		"type":         "service_account",
+		"client_email": conf.Email,
+		"private_key":  string(conf.PrivateKey),
+		"token_uri":    conf.TokenURL, // This is often required by the parser
+	}
+
+	jsonKey, err := json.Marshal(sa)
+	if err != nil {
+		return nil
+	}
+
+	// CredentialsFromJSONWithParams is the correct function to create credentials
+	// from in-memory JSON and specify parameters like UseSelfSignedJWT.
+	gcred, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes:           conf.Scopes,
+		UseSelfSignedJWT: true,
+		CredentialsJSON: jsonKey,
+	})
+	if err != nil {
+		return nil
+	}
+
+	// The returned 'creds' object contains a TokenSource that is already
+	// a compliant oauth2.TokenSource.
+	tokenSource := oauth2adapt.Oauth2CredentialsFromAuthCredentials(gcred).TokenSource
+	return tokenSource
 }
