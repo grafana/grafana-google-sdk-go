@@ -3,8 +3,9 @@ package tokenprovider
 import (
 	"context"
 
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/oauth2adapt"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/impersonate"
 )
 
@@ -51,10 +52,14 @@ func (source *gceSource) getCacheKey() string {
 }
 
 func (source *gceSource) getToken(ctx context.Context) (*oauth2.Token, error) {
-	tokenSource, err := google.DefaultTokenSource(ctx, source.scopes...)
+	gcred, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes:           source.scopes,
+		UseSelfSignedJWT: true,
+	})
 	if err != nil {
 		return nil, err
 	}
+	tokenSource := oauth2adapt.Oauth2CredentialsFromAuthCredentials(gcred).TokenSource
 	return tokenSource.Token()
 }
 

@@ -3,6 +3,8 @@ module github.com/grafana/grafana-google-sdk-go
 go 1.24.3
 
 require (
+	cloud.google.com/go/auth v0.16.1
+	cloud.google.com/go/auth/oauth2adapt v0.2.8
 	github.com/grafana/grafana-plugin-sdk-go v0.277.1
 	github.com/magefile/mage v1.15.0
 	github.com/stretchr/testify v1.10.0
@@ -10,8 +12,6 @@ require (
 )
 
 require (
-	cloud.google.com/go/auth v0.16.1 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
