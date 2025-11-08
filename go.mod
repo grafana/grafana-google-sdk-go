@@ -2,7 +2,7 @@ module github.com/grafana/grafana-google-sdk-go
 
 go 1.24.6
 
-toolchain go1.24.9
+toolchain go1.25.4
 
 require (
 	github.com/grafana/grafana-plugin-sdk-go v0.280.0
