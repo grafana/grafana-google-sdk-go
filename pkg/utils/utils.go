@@ -44,9 +44,14 @@ func readPrivateKeyFromFile(rsaPrivateKeyLocation string) (string, error) {
 			PrivateKey string `json:"private_key"`
 		}
 
-		if err := json.Unmarshal(data, &sa); err == nil && sa.PrivateKey != "" {
-			return strings.ReplaceAll(sa.PrivateKey, "\\n", "\n"), nil
+		if err := json.Unmarshal(data, &sa); err != nil {
+			return "", fmt.Errorf("failed to parse service account JSON: %w", err)
 		}
+		if sa.PrivateKey == "" {
+			return "", fmt.Errorf("service account JSON does not contain private_key")
+		}
+
+		return strings.ReplaceAll(sa.PrivateKey, "\\n", "\n"), nil
 	}
 
 	// Otherwise assume it's a raw PEM key
