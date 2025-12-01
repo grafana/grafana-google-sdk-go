@@ -51,7 +51,7 @@ func readPrivateKeyFromFile(rsaPrivateKeyLocation string) (string, error) {
 			return "", fmt.Errorf("service account JSON does not contain private_key")
 		}
 
-		return strings.ReplaceAll(sa.PrivateKey, "\\n", "\n"), nil
+		return normalizePrivateKey(sa.PrivateKey), nil
 	}
 
 	// Otherwise assume it's a raw PEM key
@@ -82,5 +82,9 @@ func GetPrivateKey(settings *backend.DataSourceInstanceSettings) (string, error)
 	privateKey := settings.DecryptedSecureJSONData["privateKey"]
 
 	// React might escape newline characters like this \\n so we need to handle that
-	return strings.ReplaceAll(privateKey, "\\n", "\n"), nil
+	return normalizePrivateKey(privateKey), nil
+}
+
+func normalizePrivateKey(pk string) string {
+	return strings.ReplaceAll(pk, "\\n", "\n")
 }
