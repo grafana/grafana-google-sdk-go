@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.3 (unreleased)
+
+- Add support for reading private keys directly from JSON service account files in `readPrivateKeyFromFile`.
+
 ## v0.4.2
 
 - Narrow token cache scope to the provider level (#17)

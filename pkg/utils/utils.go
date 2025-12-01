@@ -33,12 +33,29 @@ func readPrivateKeyFromFile(rsaPrivateKeyLocation string) (string, error) {
 		return "", fmt.Errorf("missing file location for private key")
 	}
 
-	privateKey, err := os.ReadFile(rsaPrivateKeyLocation)
+	data, err := os.ReadFile(rsaPrivateKeyLocation)
 	if err != nil {
 		return "", fmt.Errorf("could not read private key file from file system: %w", err)
 	}
 
-	return string(privateKey), nil
+	// If file seems to be a service account JSON, try extracting private_key
+	if strings.HasSuffix(strings.ToLower(rsaPrivateKeyLocation), ".json") {
+		var sa struct {
+			PrivateKey string `json:"private_key"`
+		}
+
+		if err := json.Unmarshal(data, &sa); err != nil {
+			return "", fmt.Errorf("failed to parse service account JSON: %w", err)
+		}
+		if sa.PrivateKey == "" {
+			return "", fmt.Errorf("service account JSON does not contain private_key")
+		}
+
+		return normalizePrivateKey(sa.PrivateKey), nil
+	}
+
+	// Otherwise assume it's a raw PEM key
+	return string(data), nil
 }
 
 type JSONData struct {
@@ -57,13 +74,17 @@ func GetPrivateKey(settings *backend.DataSourceInstanceSettings) (string, error)
 	if jsonData.PrivateKeyPath != "" {
 		privateKey, err := readPrivateKeyFromFile(jsonData.PrivateKeyPath)
 		if err != nil {
-			return "", fmt.Errorf("could not write private key to DataSourceInfo json: %w", err)
+			return "", fmt.Errorf("could not read private key from file: %w", err)
 		}
-
 		return privateKey, nil
-	} else {
-		privateKey := settings.DecryptedSecureJSONData["privateKey"]
-		// React might escape newline characters like this \\n so we need to handle that
-		return strings.ReplaceAll(privateKey, "\\n", "\n"), nil
 	}
+
+	privateKey := settings.DecryptedSecureJSONData["privateKey"]
+
+	// React might escape newline characters like this \\n so we need to handle that
+	return normalizePrivateKey(privateKey), nil
+}
+
+func normalizePrivateKey(pk string) string {
+	return strings.ReplaceAll(pk, "\\n", "\n")
 }
