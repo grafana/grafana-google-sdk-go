@@ -3,7 +3,7 @@ module github.com/grafana/grafana-google-sdk-go
 go 1.25.6
 
 require (
-	github.com/grafana/grafana-plugin-sdk-go v0.287.0
+	github.com/grafana/grafana-plugin-sdk-go v0.288.0
 	github.com/magefile/mage v1.15.0
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.35.0

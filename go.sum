@@ -59,8 +59,8 @@ github.com/googleapis/enterprise-certificate-proxy v0.3.11 h1:vAe81Msw+8tKUxi2Dq
 github.com/googleapis/enterprise-certificate-proxy v0.3.11/go.mod h1:RFV7MUdlb7AgEq2v7FmMCfeSMCllAzWxFgRdusoGks8=
 github.com/googleapis/gax-go/v2 v2.16.0 h1:iHbQmKLLZrexmb0OSsNGTeSTS0HO4YvFOG8g5E4Zd0Y=
 github.com/googleapis/gax-go/v2 v2.16.0/go.mod h1:o1vfQjjNZn4+dPnRdl/4ZD7S9414Y4xA+a/6Icj6l14=
-github.com/grafana/grafana-plugin-sdk-go v0.287.0 h1:CEiNZidjZ0b711cYcwPK8+mbVUWVQYSEJTkizySNwD0=
-github.com/grafana/grafana-plugin-sdk-go v0.287.0/go.mod h1:+acajHDMI7l1/a5H+n5O+ewyXz+hlH4xKTLkFGg+LOI=
+github.com/grafana/grafana-plugin-sdk-go v0.288.0 h1:DW1ZmAQV9ub9+mjrrlEkT5k96r+vBJNgkDpYd9JtleE=
+github.com/grafana/grafana-plugin-sdk-go v0.288.0/go.mod h1:+acajHDMI7l1/a5H+n5O+ewyXz+hlH4xKTLkFGg+LOI=
 github.com/grafana/otel-profiling-go v0.5.1 h1:stVPKAFZSa7eGiqbYuG25VcqYksR6iWvF3YH66t4qL8=
 github.com/grafana/otel-profiling-go v0.5.1/go.mod h1:ftN/t5A/4gQI19/8MoWurBEtC6gFw8Dns1sJZ9W4Tls=
 github.com/grafana/pyroscope-go/godeltaprof v0.1.9 h1:c1Us8i6eSmkW+Ez05d3co8kasnuOY813tbMN8i/a3Og=
