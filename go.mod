@@ -4,7 +4,7 @@ go 1.25.7
 
 require (
 	github.com/grafana/grafana-plugin-sdk-go v0.290.0
-	github.com/magefile/mage v1.15.0
+	github.com/magefile/mage v1.16.0
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.35.0
 )
