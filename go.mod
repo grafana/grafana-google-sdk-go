@@ -3,7 +3,7 @@ module github.com/grafana/grafana-google-sdk-go
 go 1.26.5
 
 require (
-	github.com/grafana/grafana-plugin-sdk-go v0.297.0
+	github.com/grafana/grafana-plugin-sdk-go v0.298.0
 	github.com/magefile/mage v1.17.2
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/oauth2 v0.37.0
@@ -49,7 +49,7 @@ require (
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.12 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.32.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0 // indirect
 	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/go-plugin v1.8.0 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
@@ -69,7 +69,7 @@ require (
 	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.1 // indirect
-	github.com/prometheus/procfs v0.22.0 // indirect
+	github.com/prometheus/procfs v0.23.0 // indirect
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0 // indirect
@@ -84,12 +84,12 @@ require (
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
 	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e // indirect
-	golang.org/x/net v0.61.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
-	google.golang.org/api v0.308.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20261019180522-ce908d29299b // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261019180522-ce908d29299b // indirect
-	google.golang.org/grpc v1.84.0 // indirect
+	google.golang.org/api v0.309.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20261026165753-2ffab32bce7e // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261026165753-2ffab32bce7e // indirect
+	google.golang.org/grpc v1.85.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
