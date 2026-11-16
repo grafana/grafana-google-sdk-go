@@ -2,9 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## v0.4.3 (unreleased)
+## v0.4.3
 
 - Add support for reading private keys directly from JSON service account files in `readPrivateKeyFromFile`.
+- Update dependencies
 
 ## v0.4.2
 
